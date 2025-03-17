@@ -1,3 +1,60 @@
+//Prettify
+/**
+ * Converts a number into a more readable format suitable for display.
+ * @param {Number} number - number to convert
+ * @returns string representation of the number
+ */
+function prettify(number) {
+    // Thanks, Trimps!
+    if (!isFinite(number)) return "Infinity";
+    if (number >= 1000 && number < 10000) return Math.floor(number);
+    if (number == 0) return "0";
+    if (number < 0) return "-" + prettify(-number);
+    if (number < 0.005) return (+number).toExponential(2);
+
+
+    function prettifySub(number) {
+        number = parseFloat(number);
+        var floor = Math.floor(number);
+        if (number === floor) // number is an integer, just show it as-is
+            return number;
+        var precision = 3 - floor.toString().length; // use the right number of digits
+
+
+        return number.toFixed(precision);
+    }
+
+
+    var base = Math.floor(Math.log(number) / Math.log(1000));
+    if (base <= 0) return prettifySub(number);
+
+
+
+
+    number /= Math.pow(1000, base);
+    if (number >= 999.5) {
+        // 999.5 rounds to 1000 and we don’t want to show “1000K” or such
+        number /= 1000;
+        ++base;
+    }
+
+    var suffices = [
+        'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc', 'Ud',
+        'Dd', 'Td', 'Qad', 'Qid', 'Sxd', 'Spd', 'Od', 'Nd', 'V', 'Uv', 'Dv',
+        'Tv', 'Qav', 'Qiv', 'Sxv', 'Spv', 'Ov', 'Nv', 'Tg', 'Utg', 'Dtg', 'Ttg',
+        'Qatg', 'Qitg', 'Sxtg', 'Sptg', 'Otg', 'Ntg', 'Qaa', 'Uqa', 'Dqa', 'Tqa',
+        'Qaqa', 'Qiqa', 'Sxqa', 'Spqa', 'Oqa', 'Nqa', 'Qia', 'Uqi', 'Dqi',
+        'Tqi', 'Qaqi', 'Qiqi', 'Sxqi', 'Spqi', 'Oqi', 'Nqi', 'Sxa', 'Usx',
+        'Dsx', 'Tsx', 'Qasx', 'Qisx', 'Sxsx', 'Spsx', 'Osx', 'Nsx', 'Spa',
+        'Usp', 'Dsp', 'Tsp', 'Qasp', 'Qisp', 'Sxsp', 'Spsp', 'Osp', 'Nsp',
+        'Og', 'Uog', 'Dog', 'Tog', 'Qaog', 'Qiog', 'Sxog', 'Spog', 'Oog',
+        'Nog', 'Na', 'Un', 'Dn', 'Tn', 'Qan', 'Qin', 'Sxn', 'Spn', 'On',
+        'Nn', 'Ct', 'Uc'
+    ];
+    var suffix = suffices[base - 1];
+    return prettifySub(number) + suffix;
+}
+
 class Resource {
     constructor(resourceName, pic, per_second = 0) {
         this.resourceName = resourceName;
@@ -22,7 +79,7 @@ class Resource {
 
         this.main.onclick = () => this.gather();
 
-        document.getElementById("resource_area").appendChild(this.main);
+        document.getElementById("resource_content").appendChild(this.main);
     }
 
     gather() {
@@ -130,6 +187,7 @@ class ResourceView {
 
 
 
+
 class Utility {
     constructor(name, cost, production, elementID, pic) {
         this.name = name;
@@ -176,7 +234,6 @@ class Utility {
 
         this.name_area.innerHTML = this.name;
 
-        // this.description_area.innerHTML = "Generic Description";
 
         this.production_area.innerHTML = "Produces ";
         this.production_area.appendChild(this.productionDisplay);
@@ -271,25 +328,33 @@ var utility = {
     amethystoven: new Utility("Amethyst Oven", 5000, 100, "amethystoven", "images/ovens/amethystoven.png")
 };
 
-// var oven = new Utility("Oven", 1, 1, "oven", "images/ovens/oven.png")
-// var silveroven = new Utility("Silver Oven", 2, 2, "silveroven", "images/ovens/silveroven.png")
-// var goldoven = new Utility("Gold Oven", 500, 5, "goldoven", "images/ovens/goldoven.png")
-// var platoven = new Utility("Platnium Oven", 1500, 15, "platoven", "images/ovens/platinumoven.png")
-// var amethystoven = new Utility("Amethyst Oven", 5000, 100, "amethystoven", "images/ovens/amethystoven.png")
 
 
-// // arrays
-// var utility = [
-//     oven,
-//     silveroven,
-//     goldoven,
-//     platoven,
-//     amethystoven
-// ];
+function set_Active_Tab(tabid) { //pass params tabid
+    let tabs = document.querySelectorAll(".tab_button"); //select all elements with the class "tab_button" (we also create an array here)
+    tabs.forEach(tab => { //calls the parent function for each element in the tabs array
+        tab.classList.remove("active_tab"); //removes class
+    });
+
+    document.getElementById(tabid).classList.add("active_tab"); // Add to the clicked tab
+    console.log(tabs);
+}
 
 
+function resource_Tab_Click() {
+    document.getElementById("resource_content").style.display = "";
+    document.getElementById("milk_content").style.display = "none";
+    set_Active_Tab("resource_tab");
 
+}
 
+function milk_Tab_Click() {
+    document.getElementById("resource_content").style.display = "none";
+    document.getElementById("milk_content").style.display = "";
+    set_Active_Tab("milk_tab");
+
+}
+resource_Tab_Click();
 
 var last_tick = Date.now();
 
@@ -345,62 +410,7 @@ window.setInterval(tick, 1000 / 60);
 
 
 
-//Prettify
-/**
- * Converts a number into a more readable format suitable for display.
- * @param {Number} number - number to convert
- * @returns string representation of the number
- */
-function prettify(number) {
-    // Thanks, Trimps!
-    if (!isFinite(number)) return "Infinity";
-    if (number >= 1000 && number < 10000) return Math.floor(number);
-    if (number == 0) return "0";
-    if (number < 0) return "-" + prettify(-number);
-    if (number < 0.005) return (+number).toExponential(2);
 
-
-    function prettifySub(number) {
-        number = parseFloat(number);
-        var floor = Math.floor(number);
-        if (number === floor) // number is an integer, just show it as-is
-            return number;
-        var precision = 3 - floor.toString().length; // use the right number of digits
-
-
-        return number.toFixed(precision);
-    }
-
-
-    var base = Math.floor(Math.log(number) / Math.log(1000));
-    if (base <= 0) return prettifySub(number);
-
-
-
-
-    number /= Math.pow(1000, base);
-    if (number >= 999.5) {
-        // 999.5 rounds to 1000 and we don’t want to show “1000K” or such
-        number /= 1000;
-        ++base;
-    }
-
-    var suffices = [
-        'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc', 'Ud',
-        'Dd', 'Td', 'Qad', 'Qid', 'Sxd', 'Spd', 'Od', 'Nd', 'V', 'Uv', 'Dv',
-        'Tv', 'Qav', 'Qiv', 'Sxv', 'Spv', 'Ov', 'Nv', 'Tg', 'Utg', 'Dtg', 'Ttg',
-        'Qatg', 'Qitg', 'Sxtg', 'Sptg', 'Otg', 'Ntg', 'Qaa', 'Uqa', 'Dqa', 'Tqa',
-        'Qaqa', 'Qiqa', 'Sxqa', 'Spqa', 'Oqa', 'Nqa', 'Qia', 'Uqi', 'Dqi',
-        'Tqi', 'Qaqi', 'Qiqi', 'Sxqi', 'Spqi', 'Oqi', 'Nqi', 'Sxa', 'Usx',
-        'Dsx', 'Tsx', 'Qasx', 'Qisx', 'Sxsx', 'Spsx', 'Osx', 'Nsx', 'Spa',
-        'Usp', 'Dsp', 'Tsp', 'Qasp', 'Qisp', 'Sxsp', 'Spsp', 'Osp', 'Nsp',
-        'Og', 'Uog', 'Dog', 'Tog', 'Qaog', 'Qiog', 'Sxog', 'Spog', 'Oog',
-        'Nog', 'Na', 'Un', 'Dn', 'Tn', 'Qan', 'Qin', 'Sxn', 'Spn', 'On',
-        'Nn', 'Ct', 'Uc'
-    ];
-    var suffix = suffices[base - 1];
-    return prettifySub(number) + suffix;
-}
 
 
 

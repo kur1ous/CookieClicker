@@ -31,6 +31,32 @@ body {
 }
  
 
+
+/*tabs*/
+.tab_button {
+    opacity: 0.9;
+    background-color: #afcffc;
+    border: none;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding:10px;
+    font-size: 15px;
+}
+.tab_button:hover {
+    background-color: rgb(203, 223, 251);
+}
+
+.tab_content {
+    background-color: #afcffc;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.active_tab {
+    background-color: #78a9ee !important; 
+}
+
+
 .resource p {
     padding: 5px 10px;
     background-color: #ffffff;
@@ -224,7 +250,6 @@ button {
 /* When hovering over the trigger area or the panel, slide it out */
 #utility_hover_zone:hover + #utility_area,
 #utility_area:hover {
-    
     right: 0;
 }
 
