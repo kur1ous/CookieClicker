@@ -316,10 +316,47 @@ class ProgressBarView {
     }
 }
 
+class Spell {
+    constructor(name, desc, cost, duration, cooldown, picture) {
+        this.name = name;
+        this.desc = desc;
+        this.cost = cost;
+        this.duration = duration;
+        this.cooldown = cooldown;
+
+        this.main = document.createElement("div");
+        this.main.classList.add("spells")
+        this.spellimage = document.createElement("img");
+        this.spellimage.src = picture;
+        this.spellimage.classList.add("spellsimage")
+        this.spelldesc = document.createElement("div");
+        this.spelldesc.append(this.desc);
+        this.spellcost = document.createElement("div");
+        this.spellcost.classList.add("spellsprice")
+        this.spellcost.append(this.cost);
+
+        this.main.appendChild(this.spellcost);
+        this.main.appendChild(this.spellimage);
+        this.main.appendChild(this.spelldesc);
+        this.main.append(this.name);
+
+        document.getElementById("spells_content").appendChild(this.main);
+    }
+
+    
+}
+
+var spells = {
+    instabake: new Spell("Instabake", "*woosh*", 50, 0, 10, "images/spells/instantbake.png"),
+    overdrive: new Spell("Overdrive", "Absolute", 100, 0, 5, "images/spells/overdrive.png"),
+    gamble: new Spell("Gamble", "What are the odds?", 20, 0, 5, "images/spells/gamble.png")
+
+}
+
 //resource creation
 var resources = {
     cookies: new Resource("🍪", "images/resources/cookie.png"),
-    milk: new CappedResource("🥛", "images/resources/milk.png", 100,  0.1)
+    milk: new CappedResource("🥛", "images/resources/milk.png", 100,  1)
 };
 
 
