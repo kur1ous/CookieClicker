@@ -183,11 +183,6 @@ class ResourceView {
     
 }
 
-
-
-
-
-
 class Utility {
     constructor(name, cost, production, elementID, pic) {
         this.name = name;
@@ -296,6 +291,30 @@ class Utility {
     // }
 }
 
+class ProgressBarView {
+    constructor(resource, bg, fg) {
+        this.resource = resource;
+
+        this.main = document.createElement("div");
+        this.main.style.backgroundColor = bg;
+        this.main.classList.add("progress_bar");
+        
+        this.fill = document.createElement("div");
+        this.fill.style.backgroundColor = fg;
+        this.fill.classList.add("progress_bar_inner");
+
+        this.fill.append("MILK")
+        
+        this.main.appendChild(this.fill);
+        this.updateUI();
+
+    }
+
+    updateUI() {
+        var pct = (this.resource.quantity/this.resource.cap) * 100;
+        this.fill.style.width = pct + "%";
+    }
+}
 
 //resource creation
 var resources = {
@@ -306,16 +325,19 @@ var resources = {
 
 var cookiesDisplay = new ResourceView(resources.cookies);
 var milkDisplay = new ResourceView(resources.milk);
+var milkprog = new ProgressBarView(resources.milk, "black", "grey");
+
 
 var infoBar = document.getElementById("info_bar");
 
 infoBar.appendChild(cookiesDisplay.main);
 infoBar.appendChild(milkDisplay.main);
+infoBar.appendChild(milkprog.main);
 
 
 
 
-var resourceViews = [cookiesDisplay, milkDisplay]
+var resourceViews = [cookiesDisplay, milkDisplay, milkprog]
 
 
 
@@ -329,32 +351,24 @@ var utility = {
 };
 
 
+function tab_Click(tabname) {
+    let tabs = document.querySelectorAll(".tab_button"); //takes all elements with class "tab_button" and stores in nodelist    
+    let contents = document.querySelectorAll(".tab_content");
+    
+    contents.forEach(content => content.style.display = "none"); //loops through all elements with class "tab_content" and hides div
+    tabs.forEach(tab => tab.classList.remove("active_tab")); //loops through all elements in tabs nodelist and removes "active_tab" from button
 
-function set_Active_Tab(tabid) { //pass params tabid
-    let tabs = document.querySelectorAll(".tab_button"); //select all elements with the class "tab_button" (we also create an array here)
-    tabs.forEach(tab => { //calls the parent function for each element in the tabs array
-        tab.classList.remove("active_tab"); //removes class
-    });
+    let active_tab_button = document.getElementById(tabname + "_tab");
+    let active_content = document.getElementById(tabname + "_content");
 
-    document.getElementById(tabid).classList.add("active_tab"); // Add to the clicked tab
-    console.log(tabs);
-}
-
-
-function resource_Tab_Click() {
-    document.getElementById("resource_content").style.display = "";
-    document.getElementById("milk_content").style.display = "none";
-    set_Active_Tab("resource_tab");
+    if (active_tab_button && active_content) {
+        active_tab_button.classList.add("active_tab");
+        active_content.style.display = "";
+    }
 
 }
+tab_Click('resource');
 
-function milk_Tab_Click() {
-    document.getElementById("resource_content").style.display = "none";
-    document.getElementById("milk_content").style.display = "";
-    set_Active_Tab("milk_tab");
-
-}
-resource_Tab_Click();
 
 var last_tick = Date.now();
 
@@ -389,29 +403,10 @@ function tick() {
 
     
 
+    
+
 
     update_ui();
 };
 
 window.setInterval(tick, 1000 / 60);
-
-
-
-
-
-
-
-
-
-//test
-
-
-
-
-
-
-
-
-
-
-

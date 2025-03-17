@@ -257,6 +257,18 @@ button {
     font-family: serif;    
 }
 
+.progress_bar {
+    width: 100px;
+    height: 20px;
+    position: relative;
+    border-radius: 5px;
+}
+
+.progress_bar_inner {
+    height: 100%;
+    border-radius: 5px;
+}
+
 
 
 
