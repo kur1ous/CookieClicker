@@ -336,7 +336,7 @@ button {
     display: flex;
     flex-wrap: wrap;
     background: linear-gradient(135deg, #8fb6ff 0%, #f4cafb 100%);
-
+    height: auto;
     gap: 15px;
     justify-content: center;
     align-items: center;
@@ -353,7 +353,7 @@ button {
     border-radius: 15px;
     padding: 15px;
     width: 120px;
-    height: 160px;
+    height: auto;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
 }
@@ -364,6 +364,7 @@ button {
 }
 
 .spellsimage {
+    display: flex;
     width: 80px;
     height: 80px;
     border-radius: 50%;
@@ -379,12 +380,43 @@ button {
     font-family: "magic";
 }
 
+.spellsduration {
+    font-family: "magic";
+}
+
 .spellsname {
     font-size: 14px;
     font-family: "magic";
     color: white;
     text-align: center;
     margin-top: 8px;
+    
+}
+
+
+.spellstooltip {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    text-align: center;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    width: 180px;
+    
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s;
+}
+
+/* Show tooltip only when hovering over its specific button */
+.spells:hover > .spellstooltip {
+    visibility: visible;
+    opacity: 1;
 }
 
 
@@ -413,3 +445,79 @@ button {
     transition: height 0.3s ease-in-out;
 }
 
+
+
+/* research */
+
+#research_content {
+    display: flex;
+    flex-wrap: wrap;
+    background: linear-gradient(135deg, #3279f2 0%, #ffffff 100%);
+    height: auto;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.research_main {
+    position: relative;
+    display: flex;
+    
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(135deg, #3279f2 0%, #ffffff 100%);
+    border-radius: 15px;
+    padding: 15px;
+    width: 120px;
+    height: auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.research_desc {
+    font-family: serif;
+}
+
+.research_main:hover {
+    transform: scale(1.07);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.research_image {
+    display: flex;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Image Hover Effect */
+.research_main:hover .research_image {
+    transform: rotate(10deg) scale(1.02);
+} 
+
+
+.researchtooltip {
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    text-align: center;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    width: 180px;
+    
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s;
+}
+
+.research_main:hover > .researchtooltip {
+    visibility: visible;
+    opacity: 1;
+}
