@@ -82,6 +82,10 @@ class Resource {
         document.getElementById("resource_content").appendChild(this.main);
     }
 
+    getclick() {
+
+    }
+
     gather() {
         this.give(1);
     }
@@ -129,7 +133,6 @@ class CappedResource extends Resource {
     }
 
     updateUI() {
-
     }
 }
 
@@ -218,7 +221,7 @@ class Utility {
 
         this.productionDisplay = document.createElement("span");
         this.productionDisplay.classList.add("utility_production");
-        this.productionDisplay.innerHTML = this.show;
+        this.show = this.production * this.quantity;
     
 
 
@@ -286,13 +289,20 @@ class Utility {
     updateUI() {
         this.quantityDisplay.innerHTML = prettify(this.quantity);
         this.costDisplay.innerHTML = prettify(this.cost);
-        this.productionDisplay.innerHTML = prettify(this.show);
+        this.productionDisplay.innerHTML = prettify(this.getProduction() * this.quantity);
 
     }
 
-    // tick(delta) {
-    //     resources.cookies.give(this.production * this.quantity * delta)
-    // }
+
+    getProduction() {
+        return this.production * (ResearchProjects.ProductionResearch.level * 0.1);
+    }
+    
+
+    tick(delta) {
+        resources.cookies.give(this.getProduction() * this.quantity * delta);
+        // resources.cookies.give(utility[i].getProduction() * utility[i].quantity * delta);
+    }
 }
 
 class ProgressBarView {
@@ -361,7 +371,7 @@ class Spell {
 
 class ResearchProject {
 	
-	constructor(name, desc, timeNeeded, picture, level = 0, progress,) {
+	constructor(name, desc, timeNeeded, picture, level = 0, progress =0,) {
 		this.name = name; 
         this.desc = desc;
         this.timeNeeded = timeNeeded;
@@ -374,6 +384,10 @@ class ResearchProject {
 
         this.researchname = document.createElement("span");
         this.researchname.classList.add("research_desc");
+
+        this.researchlevel = document.createElement("span");
+        this.researchlevel.classList.add("research_desc");
+        
   
 
         this.researchimage = document.createElement("img");
@@ -389,10 +403,13 @@ class ResearchProject {
         this.tooltip = document.createElement("div");
         this.tooltip.classList.add("researchtooltip");
 
+
+        this.researchlevel.innerHTML = "level " + this.level;
         this.researchname.append(this.name);
         this.tneeded.append(this.timeNeeded);
         this.description.append(this.desc);
 
+        this.tooltip.appendChild(this.researchlevel);
         this.main.appendChild(this.researchname);
         this.main.appendChild(this.tooltip);
         this.tooltip.appendChild(this.description)
@@ -408,80 +425,78 @@ class ResearchProject {
 
     select() {
         CurrentResearch = this;
+        console.log(this);
 
     }
 
     tick(delta) {
-        console.log(this.name);
+        this.progress += delta;
+        if (this.progress >= this.timeNeeded) {
+            this.levelUP();
+        }
     }
 
+    levelUP() {
+        this.progress -= this.timeNeeded;
+        this.level += 1;
+        this.timeNeeded *= 1.5;
+        console.log(this.name + this.level);
+        this.onComplete();
+    }
+
+    onComplete() {
+
+    }
+
+
+
     updateUI() {
-        
+        this.researchlevel.innerHTML = "level: " + prettify(this.level);
+
+        //add active tab feature
     }
 }
 
-// class MilkResearch extends ResearchProject {
-//     constructor(name, increase, timeNeeded, level, cost) {
-//         this.name = name;
-//         this.increase = increase;
-//         this.cost = cost;
-//         this.timeNeeded = timeNeeded;
-//         this.level = level;
-//     }
+class MilkResearch extends ResearchProject {
+    constructor(){
+        super("Milk", "Increase milk regen", 5, "images/research/milkresearch.png", 0, 0);
+    }
+    onComplete() {
+        resources.milk.persecond += 0.1;
+        console.log("test")
+    }
+}
 
-//     levelUP(){
-//         if (resources.milk.quantity >= this.cost) {
-//             this.quantity = this.quantity + 1;
-//             resources.milk.spend(this.cost)
-//             this.cost = this.cost * 1.15;
-//             this.show = this.production * this.quantity
-//             console.log(this.name + this.quantity)
+class CapResearch extends ResearchProject {
+    constructor(){
+        super("Milk Cap", "Increase Milk Cap", 5, "images/research/capincrease.png", 0, 0)
+    }
+    onComplete(){
+        resources.milk.cap += 1;
+        console.log(this)
+    }
+}
 
-//         }
-//     }
-// }
+class ClickResearch extends ResearchProject {
+    constructor(){
+        super("Click", "Increase Cookie per Click", 5, "images/research/click.png", 0, 0)
+    }
+    onComplete(){
+        for (let i in utility) {
+            utility[i].getProduction()*utility[i].quantity;
+            console.log(utility[i].getProduction()*utility[i].quantity);
+        }
+    }
+}
 
-// class ClickResearch extends ResearchProject {
-//     constructor(name, increase, timeNeeded, level) {
-//         this.name = name;
-//         this.increase = increase;
-//         this.level = level + 1;
-//     }
 
-//     levelUP(){
-        
-//     }
-// }
 
-// class ProductionResearch extends ResearchProject {
-//     constructor(name, increase, timeNeeded, level) {
-//         this.name = name;
-//         this.increase = increase;
-//         this.level = level;
-//     }
-
-//     levelUP(){
-        
-//     }
-// }
-
-// class CapResearch extends ResearchProject {
-//     constructor(name, increase, timeNeeded, level) {
-//         this.name = name;
-//         this.increase = increase;
-//         this.level = level;
-//     }
-
-//     levelUP(){
-        
-//     }
-// }
 
 var ResearchProjects = {
-    MilkResearch: new ResearchProject("Milk Research", "Increase milk regen", 5,"images/research/milkresearch.png"),
-    ClickResearch: new ResearchProject("Click Research", "Increase production per click", 5,"images/research/click.png"),
-    ProductionResearch: new ResearchProject("Prod Research", "Increace utility production", 5,"images/research/production.png"),
-    CapResearch: new ResearchProject("Cap Research", "Increase milk cap", 5,"images/research/capincrease.png")
+    MilkResearch: new MilkResearch(),
+    ClickResearch: new ClickResearch(),
+    ProductionResearch: new ResearchProject("Production", "Increace utility production", 5,"images/research/production.png"),
+    CapResearch: new CapResearch()
 
 }
 
@@ -526,9 +541,9 @@ var resourceViews = [cookiesDisplay, milkDisplay, milkprog]
 var utility = {
     oven: new Utility("Oven", 50, 1, "oven", "images/ovens/oven.png"),
     silveroven: new Utility("Silver Oven", 200, 2, "silveroven", "images/ovens/silveroven.png"),
-    goldoven: new Utility("Gold Oven", 500, 5, "goldoven", "images/ovens/goldoven.png"),
-    platoven: new Utility("Platnium Oven", 1500, 15, "platoven", "images/ovens/platinumoven.png"),
-    amethystoven: new Utility("Amethyst Oven", 5000, 100, "amethystoven", "images/ovens/amethystoven.png")
+    goldoven: new Utility("Gold Oven", 500, 3, "goldoven", "images/ovens/goldoven.png"),
+    platoven: new Utility("Platnium Oven", 1500, 5, "platoven", "images/ovens/platinumoven.png"),
+    amethystoven: new Utility("Amethyst Oven", 5000, 10, "amethystoven", "images/ovens/amethystoven.png")
 };
 
 
@@ -563,6 +578,10 @@ function update_ui() {
         utility[i].updateUI();
     }
 
+    for (let i in ResearchProjects) {
+        ResearchProjects[i].updateUI();
+    }
+
 };
 
 function tick() {
@@ -582,7 +601,7 @@ function tick() {
     }
 
     for (let i in utility) {
-        resources.cookies.give(utility[i].production *utility[i].quantity * delta);
+        utility[i].tick(delta);
     }
 
     
@@ -594,3 +613,5 @@ function tick() {
 };
 
 window.setInterval(tick, 1000 / 60);
+
+var cookiegive = resources.cookies;
