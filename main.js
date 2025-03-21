@@ -79,19 +79,21 @@ class Resource {
 
         this.main.onclick = () => this.gather();
 
-        document.getElementById("resource_content").appendChild(this.main);
-    }
+        if (this instanceof ClickableResource) {
+            document.getElementById("resource_content").appendChild(this.main);
+        }
+}
 
     getclick() {
 
     }
 
     gather() {
-        this.give(1);
+        // this.give(1);
     }
 
     spend(qty) {
-        this.quantity = this.quantity - qty;
+        // this.quantity = this.quantity - qty;
     }
 
     give(qty) {
@@ -105,6 +107,22 @@ class Resource {
     tick(delta) {   
         this.give(this.persecond*delta);   
     }
+}
+
+class ClickableResource extends Resource {
+    constructor(){
+        super("🍪", "images/resources/cookie.png", 0)
+    }
+
+    gather() {
+        this.give(1+(ResearchProjects.ClickResearch.onComplete()));
+    }
+
+    spend(qty) {
+        this.quantity = this.quantity - qty;
+    }
+
+
 }
 
 class CappedResource extends Resource {
@@ -121,6 +139,7 @@ class CappedResource extends Resource {
 
     
     }
+
     give(qty) {
         super.give(qty);
         if (this.quantity > this.cap) {
@@ -128,11 +147,17 @@ class CappedResource extends Resource {
         }
     }
 
+    
+
     spend(qty) {
         this.quantity = this.quantity - qty;
     }
 
     updateUI() {
+    }
+    
+    tick(delta) {   
+        this.give(this.persecond*delta);   
     }
 }
 
@@ -363,10 +388,47 @@ class Spell {
         this.main.append(this.name);
 
         this.main.appendChild(this.tooltip);
+
+        this.main.onclick = () => {this.purchase();};
+
         document.getElementById("spells_content").appendChild(this.main);
     }
 
+    getDuration(){
+        return this.duration;
+    }
+
+    purchase(){
+    if (resources.milk.quantity >= this.cost) {
+        resources.milk.spend(this.cost);
+        this.onCast();
+    }
+    else {
+        console.log("too poor!");
+        console.log(this.getDuration());
+    }
+
+    }
+
+    updateUI() {
+        this.spellduration.innerHTML = this.duration;
+    }
+
+    onCast(qty){
+
+    }
     
+}
+
+class Instabake extends Spell {
+    constructor(){
+        super("Instabake", "Hastely", 50, 0, 10, "images/spells/instantbake.png")
+    }
+
+    onCast(){
+        console.log(this)
+        resources.cookies.give(5)
+    }
 }
 
 class ResearchProject {
@@ -451,7 +513,7 @@ class ResearchProject {
 
 
     updateUI() {
-        this.researchlevel.innerHTML = "level: " + prettify(this.level);
+        this.researchlevel.innerHTML = "level: " + prettify(this.level) +" ";
 
         //add active tab feature
     }
@@ -463,7 +525,6 @@ class MilkResearch extends ResearchProject {
     }
     onComplete() {
         resources.milk.persecond += 0.1;
-        console.log("test")
     }
 }
 
@@ -483,8 +544,19 @@ class ClickResearch extends ResearchProject {
     }
     onComplete(){
         for (let i in utility) {
-            utility[i].getProduction()*utility[i].quantity;
-            console.log(utility[i].getProduction()*utility[i].quantity);
+            return (utility[i].getProduction()*utility[i].quantity*this.level)*0.01;
+        }
+    }
+}
+
+class SpellResearch extends ResearchProject {
+    constructor() {
+        super("Spells", "Increace Spell Duration", 5,"images/research/spellresearch.png")
+    }
+
+    onComplete(){
+        for(let i in spells){
+            return(spells[i].getDuration());
         }
     }
 }
@@ -496,15 +568,17 @@ var ResearchProjects = {
     MilkResearch: new MilkResearch(),
     ClickResearch: new ClickResearch(),
     ProductionResearch: new ResearchProject("Production", "Increace utility production", 5,"images/research/production.png"),
-    CapResearch: new CapResearch()
+    CapResearch: new CapResearch(),
+    SpellResearch: new SpellResearch()
+
 
 }
 
 var spells = {
-    instabake: new Spell("Instabake", "Hastely", 50, 0, 10, "images/spells/instantbake.png"),
-    overdrive: new Spell("Overdrive", "Absolute", 20, 0, 5, "images/spells/overdrive.png"),
-    milkenhancement: new Spell("Enhancement", "increasement.", 30, 0, 5, "images/spells/enhance.png"),
-    gamble: new Spell("Gamble", "What are the odds?", 20, 0, 5, "images/spells/gamble.png"),
+    instabake: new Instabake(),
+    overdrive: new Spell("Overdrive", "Absolute", 20, 1, 5, "images/spells/overdrive.png"),
+    milkenhancement: new Spell("Enhancement", "increasement.", 30, 2, 5, "images/spells/enhance.png"),
+    gamble: new Spell("Gamble", "What are the odds?", 20, 4, 5, "images/spells/gamble.png"),
 
 }
 
@@ -514,8 +588,8 @@ var CurrentResearch = null;
 
 //resource creation
 var resources = {
-    cookies: new Resource("🍪", "images/resources/cookie.png"),
-    milk: new CappedResource("🥛", "images/resources/milk.png", 100,  1)
+    cookies: new ClickableResource(),
+    milk: new CappedResource("🥛", "images/resources/milk.png", 100,  0.1)
 };
 
 
@@ -569,6 +643,10 @@ tab_Click('resource');
 var last_tick = Date.now();
 
 function update_ui() {
+
+    for (let i in spells){
+        spells[i].updateUI();
+    }
 
     for (let r in resources) { 
         resources[r].updateUI();
