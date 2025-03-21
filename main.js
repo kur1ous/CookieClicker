@@ -395,8 +395,9 @@ class Spell {
     }
 
     getDuration(){
-        return this.duration;
+        return this.duration * Math.pow(1.1, ResearchProjects.SpellResearch.level); //compound growth instead of linear
     }
+
 
     purchase(){
     if (resources.milk.quantity >= this.cost) {
@@ -411,7 +412,7 @@ class Spell {
     }
 
     updateUI() {
-        this.spellduration.innerHTML = this.duration;
+        this.spellduration.innerHTML = prettify(this.getDuration().toFixed(2)) + "s";
     }
 
     onCast(qty){
@@ -554,9 +555,9 @@ class SpellResearch extends ResearchProject {
         super("Spells", "Increace Spell Duration", 5,"images/research/spellresearch.png")
     }
 
-    onComplete(){
-        for(let i in spells){
-            return(spells[i].getDuration());
+    onComplete() {
+        for (let i in spells) {
+            spells[i].updateUI();     
         }
     }
 }
@@ -577,8 +578,7 @@ var ResearchProjects = {
 var spells = {
     instabake: new Instabake(),
     overdrive: new Spell("Overdrive", "Absolute", 20, 1, 5, "images/spells/overdrive.png"),
-    milkenhancement: new Spell("Enhancement", "increasement.", 30, 2, 5, "images/spells/enhance.png"),
-    gamble: new Spell("Gamble", "What are the odds?", 20, 4, 5, "images/spells/gamble.png"),
+    gamble: new Spell("Gamble", "What are the odds?", 20, 0, 5, "images/spells/gamble.png"),
 
 }
 
