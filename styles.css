@@ -609,3 +609,9 @@ button {
     transition: width 0.2s ease-out;
     z-index: 2;
 }
+
+.research_prog_info {
+    margin-top: 5px;
+    color: #ccc;
+    font-size: 11px;
+}

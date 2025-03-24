@@ -528,7 +528,12 @@ class ResearchProject {
         this.main.appendChild(this.researchname);
         this.main.appendChild(this.tooltip);
         this.tooltip.appendChild(this.description)
-        this.tooltip.appendChild(this.tneeded)
+
+        this.proginfo = document.createElement("div");
+        this.proginfo.classList.add("research_prog_info");
+        this.proginfo.innerHTML = "0% (0s/0s)";
+        this.tooltip.appendChild(this.proginfo);
+
         this.main.appendChild(this.researchimage);
 
         document.getElementById("research_content").appendChild(this.main)
@@ -573,7 +578,8 @@ class ResearchProject {
         this.researchlevel.innerHTML = this.level;
         var researchpct = (this.progress/this.timeNeeded) *100;
         this.progressOverlay.style.width = `${researchpct}%`;
-        this.progressOverlay.innerHTML = `${Math.floor(researchpct)}% (${prettify(this.progress.toFixed(1))}s/${prettify(this.timeNeeded.toFixed(1))}s)`;
+        this.proginfo.innerHTML = `${Math.floor(researchpct)}% (${prettify(this.progress.toFixed(1))}s / ${prettify(this.timeNeeded.toFixed(1))}s)`;
+
 
         this.progressOverlay.style.display = (CurrentResearch === this) ? 'block' : 'none';
 
