@@ -376,6 +376,34 @@ class ProgressBarView {
     }
 }
 
+class MilkProgressView {
+    constructor(resource){
+        this.resource = resource;
+
+        this.main = document.createElement("div");
+        this.main.classList.add('milk_container');
+        
+        this.fill = document.createElement('div');
+        this.fill.classList.add('milk_fill');
+
+        this.text = document.createElement('span');
+        this.text.classList.add("milk_pct")
+     
+        this.main.appendChild(this.fill);
+        this.main.appendChild(this.text);
+
+        document.getElementById('milk_content').appendChild(this.main);
+
+        this.updateUI()
+    }
+
+    updateUI(){
+        var pct = (this.resource.quantity/this.resource.cap) * 100;
+        this.fill.style.height = pct + "%";
+        this.text.innerHTML = `${Math.floor(pct)}`;
+    }
+}
+
 class Spell {
     constructor(name, desc, cost, duration, cooldown, picture) {
         this.name = name;
@@ -572,17 +600,17 @@ class ResearchProject {
 
     }
 
-
-
     updateUI() {
         this.researchlevel.innerHTML = this.level;
         var researchpct = (this.progress/this.timeNeeded) *100;
         this.progressOverlay.style.width = `${researchpct}%`;
         this.proginfo.innerHTML = `${Math.floor(researchpct)}% (${prettify(this.progress.toFixed(1))}s / ${prettify(this.timeNeeded.toFixed(1))}s)`;
-
-
-        this.progressOverlay.style.display = (CurrentResearch === this) ? 'block' : 'none';
-
+        
+        if (CurrentResearch === this) {
+            this.progressOverlay.style.display = 'block';
+        } else {
+            this.progressOverlay.style.display = 'none';
+        }
 
     }
 }
@@ -661,6 +689,10 @@ var resources = {
 };
 
 
+var milkProgView = new MilkProgressView(resources.milk);
+
+
+
 var cookiesDisplay = new ResourceView(resources.cookies);
 var milkDisplay = new ResourceView(resources.milk);
 
@@ -670,10 +702,7 @@ var infoBar = document.getElementById("info_bar");
 infoBar.appendChild(cookiesDisplay.main);
 infoBar.appendChild(milkDisplay.main);
 
-
-
-
-var resourceViews = [cookiesDisplay, milkDisplay,]
+var resourceViews = [cookiesDisplay, milkDisplay, milkProgView]
 
 
 
