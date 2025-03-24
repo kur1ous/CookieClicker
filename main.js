@@ -55,27 +55,47 @@ function prettify(number) {
     return prettifySub(number) + suffix;
 }
 
+let prodMult = 1;
+
+class Warning {
+    constructor(name, desc, time){
+        this.name = name;
+        this.desc = desc;
+        this.time = time;
+
+
+        this.main = document.createElement("div");
+        this.main.classList.add("warning");
+        this.main.append(desc);
+
+        document.getElementById("warning_area").appendChild(this.main);
+
+        setTimeout(() => {
+            this.main.remove();
+        }, this.time);
+    }
+}
+
 class Resource {
     constructor(resourceName, pic, per_second = 0) {
         this.resourceName = resourceName;
         this.quantity = 0;
+        this.basepersecond = per_second;
         this.persecond = per_second; //this is the persecond that should be used!
-        // this.emoji = emoji
+   
 
         this.main = document.createElement("div");
         this.main.classList.add("resource");
         this.image = document.createElement("img");
         this.image.src = pic;
         this.image.classList.add("resource_img");
-        this.quantityTextDisplay = document.createElement("p"); //document.createElement("p")
+        this.quantityTextDisplay = document.createElement("p"); 
         this.quantityTextDisplay.innerHTML = this.resourceName + " ";
         this.quantityDisplay = document.createElement("span");
         this.quantityDisplay.innerHTML = "0";
-        // console.log(this.main)
 
         this.quantityTextDisplay.appendChild(this.quantityDisplay);
         this.main.appendChild(this.image);
-        // this.main.appendChild(this.quantityTextDisplay);
 
         this.main.onclick = () => this.gather();
 
@@ -89,11 +109,9 @@ class Resource {
     }
 
     gather() {
-        // this.give(1);
     }
 
     spend(qty) {
-        // this.quantity = this.quantity - qty;
     }
 
     give(qty) {
@@ -241,7 +259,6 @@ class Utility {
         this.name_area = document.createElement("p");
         this.name_area.classList.add("utility_name")
 
-        // this.description_area = document.createElement("p");
         this.production_area = document.createElement("p");
 
         this.productionDisplay = document.createElement("span");
@@ -272,7 +289,6 @@ class Utility {
 
         this.info_div.appendChild(this.name_area);
 
-        // this.tooltip.appendChild(this.description_area);
         this.tooltip.appendChild(this.production_area);
         this.tooltip.appendChild(this.cost_area);
         
@@ -284,7 +300,9 @@ class Utility {
         this.button.appendChild(this.quantityDisplay);
     
 
+
         this.button.onclick = () => {this.purchase();};
+
      
         this.info_div.appendChild(this.quantityDisplay)
         this.main_icon.appendChild(this.tooltip);
@@ -301,7 +319,11 @@ class Utility {
     }
 
     purchase() {
-        if (resources.cookies.quantity >= this.cost) {
+        if (ResearchProjects.ProductionResearch.level == 0) {
+            new Warning("Purchase Warning", "Try researching production level first!", 3000)
+        }
+
+        else if (resources.cookies.quantity >= this.cost) {
             this.quantity = this.quantity + 1;
             resources.cookies.spend(this.cost)
             this.cost = this.cost * 1.15;
@@ -320,13 +342,12 @@ class Utility {
 
 
     getProduction() {
-        return this.production * (ResearchProjects.ProductionResearch.level * 0.1);
+        return prettify(this.production * (ResearchProjects.ProductionResearch.level * 0.1) * prodMult);
     }
     
 
     tick(delta) {
         resources.cookies.give(this.getProduction() * this.quantity * delta);
-        // resources.cookies.give(utility[i].getProduction() * utility[i].quantity * delta);
     }
 }
 
@@ -360,6 +381,7 @@ class Spell {
         this.name = name;
         this.desc = desc;
         this.cost = cost;
+        this.baseduration = duration;
         this.duration = duration;
         this.cooldown = cooldown;
 
@@ -395,9 +417,8 @@ class Spell {
     }
 
     getDuration(){
-        return this.duration * Math.pow(1.1, ResearchProjects.SpellResearch.level); //compound growth instead of linear
+        return this.duration;
     }
-
 
     purchase(){
     if (resources.milk.quantity >= this.cost) {
@@ -407,12 +428,14 @@ class Spell {
     else {
         console.log("too poor!");
         console.log(this.getDuration());
+
     }
 
     }
 
     updateUI() {
-        this.spellduration.innerHTML = prettify(this.getDuration().toFixed(2)) + "s";
+    
+        this.spellduration.innerHTML = this.duration;
     }
 
     onCast(qty){
@@ -422,8 +445,8 @@ class Spell {
 }
 
 class Instabake extends Spell {
-    constructor(){
-        super("Instabake", "Hastely", 50, 0, 10, "images/spells/instantbake.png")
+    constructor(name, desc, cost, duration, cooldown, img){
+        super(name, desc, cost, duration, cooldown, img)
     }
 
     onCast(){
@@ -431,6 +454,29 @@ class Instabake extends Spell {
         resources.cookies.give(5)
     }
 }
+
+class Overdrive extends Spell {
+    constructor(name, desc, cost, duration, cooldown, img){
+        super(name, desc, cost, duration, cooldown, img)
+    }
+    onCast(){
+        prodMult = 1.25;
+        for (let i in resources){
+            resources[i].persecond = resources[i].persecond * prodMult;
+        }
+        
+        setTimeout(() => {
+            prodMult = 1;
+            for (let i in resources){
+                resources[i].persecond = resources[i].basepersecond;
+            }
+            
+        }, this.duration*1000);
+        
+    }
+}
+
+
 
 class ResearchProject {
 	
@@ -445,11 +491,15 @@ class ResearchProject {
         this.main = document.createElement("div");
         this.main.classList.add("research_main");
 
+        this.progressOverlay = document.createElement("div");
+        this.progressOverlay.classList.add("research_progress");
+
+
         this.researchname = document.createElement("span");
         this.researchname.classList.add("research_desc");
 
-        this.researchlevel = document.createElement("span");
-        this.researchlevel.classList.add("research_desc");
+        this.researchlevel = document.createElement("div");
+        this.researchlevel.classList.add("research_lvl");
         
   
 
@@ -472,7 +522,9 @@ class ResearchProject {
         this.tneeded.append(this.timeNeeded);
         this.description.append(this.desc);
 
-        this.tooltip.appendChild(this.researchlevel);
+
+        this.main.appendChild(this.progressOverlay);
+        this.main.appendChild(this.researchlevel);
         this.main.appendChild(this.researchname);
         this.main.appendChild(this.tooltip);
         this.tooltip.appendChild(this.description)
@@ -487,7 +539,11 @@ class ResearchProject {
 	}
 
     select() {
+        for (let i in ResearchProjects) {
+            ResearchProjects[i].main.classList.remove("active_research");
+        }
         CurrentResearch = this;
+        this.main.classList.add("active_research");
         console.log(this);
 
     }
@@ -514,9 +570,14 @@ class ResearchProject {
 
 
     updateUI() {
-        this.researchlevel.innerHTML = "level: " + prettify(this.level) +" ";
+        this.researchlevel.innerHTML = this.level;
+        var researchpct = (this.progress/this.timeNeeded) *100;
+        this.progressOverlay.style.width = `${researchpct}%`;
+        this.progressOverlay.innerHTML = `${Math.floor(researchpct)}% (${prettify(this.progress.toFixed(1))}s/${prettify(this.timeNeeded.toFixed(1))}s)`;
 
-        //add active tab feature
+        this.progressOverlay.style.display = (CurrentResearch === this) ? 'block' : 'none';
+
+
     }
 }
 
@@ -555,9 +616,10 @@ class SpellResearch extends ResearchProject {
         super("Spells", "Increace Spell Duration", 5,"images/research/spellresearch.png")
     }
 
-    onComplete() {
-        for (let i in spells) {
-            spells[i].updateUI();     
+    onComplete(){
+        for(let i in spells){
+            spells[i].duration = spells[i].duration + (spells[i].baseduration*0.01);
+            spells[i].updateUI();
         }
     }
 }
@@ -576,9 +638,9 @@ var ResearchProjects = {
 }
 
 var spells = {
-    instabake: new Instabake(),
-    overdrive: new Spell("Overdrive", "Absolute", 20, 1, 5, "images/spells/overdrive.png"),
-    gamble: new Spell("Gamble", "What are the odds?", 20, 0, 5, "images/spells/gamble.png"),
+    instabake: new Instabake("Instabake", "Hastely", 50, 0, 10, "images/spells/instabakev2.png"),
+    overdrive: new Overdrive("Overdrive", "Increase production of all resources by 25%", 25, 10, 5, "images/spells/overdrive.png"),
+    gamble: new Spell("Gamble", "What are the odds?", 20, 4, 5, "images/spells/gamble.png"),
 
 }
 
@@ -595,19 +657,17 @@ var resources = {
 
 var cookiesDisplay = new ResourceView(resources.cookies);
 var milkDisplay = new ResourceView(resources.milk);
-var milkprog = new ProgressBarView(resources.milk, "black", "grey");
 
 
 var infoBar = document.getElementById("info_bar");
 
 infoBar.appendChild(cookiesDisplay.main);
 infoBar.appendChild(milkDisplay.main);
-infoBar.appendChild(milkprog.main);
 
 
 
 
-var resourceViews = [cookiesDisplay, milkDisplay, milkprog]
+var resourceViews = [cookiesDisplay, milkDisplay,]
 
 
 
@@ -692,4 +752,9 @@ function tick() {
 
 window.setInterval(tick, 1000 / 60);
 
-var cookiegive = resources.cookies;
+function r(qty){
+    resources.cookies.give(qty);
+}
+function m(qty){
+    resources.milk.give(qty);
+}

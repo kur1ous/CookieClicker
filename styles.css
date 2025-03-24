@@ -4,13 +4,43 @@
 }
 
 body {
+    height:80vh;
     text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
     font-family: Arial, sans-serif;
-    background-color: #ffffff;
+    background-color: #fffaf0;
+    overflow: hidden;
+
+    
 }
+
+body::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%; 
+    height: 100%;
+    background-image: url('images/background/cookiesvg.svg'); 
+    background-repeat: repeat;
+    background-size: 80px 80px; 
+    z-index: -1;
+    opacity: 0.08; 
+}   
+
+
+body::after {
+    left: -100%;
+    animation: scrollBackground 60s linear infinite;
+}
+
+@keyframes scrollBackground {
+    from { transform: translateX(0); }
+    to { transform: translateX(50%); } /* Shift half the width for smooth looping */
+}
+
 
 .resource {
     display: flex;
@@ -30,7 +60,7 @@ body {
     position: relative;
     padding: 8px;
     border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.9);
+    background: linear-gradient(135deg, #fff7e6 0%, #f9e5c1 50%, #f0d4a6 100%);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     min-width: 100px;
     text-align: center;
@@ -41,7 +71,7 @@ body {
 /*tabs*/
 .tab_button {
     opacity: 0.9;
-    background-color: #afcffc;
+    background-color: #f5e2b8;
     border: none;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
@@ -49,17 +79,18 @@ body {
     font-size: 15px;
 }
 .tab_button:hover {
-    background-color: rgb(203, 223, 251);
+    background-color: #d4a373;
 }
 
 .tab_content {
-    background-color: #afcffc;
+    background: linear-gradient(135deg, #f8d7a4 0%, #c47a4f 100%);
     padding: 20px;
     border-radius: 10px;
 }
 
 .active_tab {
-    background-color: #78a9ee !important; 
+    background-color: #a35b34 !important; 
+    color: wheat;
 }
 
 
@@ -106,7 +137,6 @@ button {
     max-width: 1000px;
     margin: 30px auto;
 
-    background-color: #fff;
     border-radius: 10px;
     box-shadow: 0, 0, 10px rgba(0, 0, 0, 0.1);
     overflow: show; 
@@ -222,7 +252,8 @@ button {
     display: flex;
     flex-direction: column; /* Stack elements vertically */
     gap: 5px; /* Space between each resource view */
-    background: linear-gradient(135deg, #b7f4d7 0%, #a1b4e5 100%);
+    background: linear-gradient(135deg, #f5e2b8 0%, #d4a373 100%);
+
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -244,7 +275,7 @@ button {
     transition: right 0.5s ease-in-out;
     /* overflow-y: auto; */
     /* max-height: 400px; */
-    background: linear-gradient(135deg, #ffffff 0%, #a7d9ff 100%);
+    background: linear-gradient(135deg, #f9e5c1 0%, #d9a86c 100%);
 }
 
 /* Invisible hover zone to trigger the panel */
@@ -282,28 +313,6 @@ button {
 
 
 
-.btn-grad {background-image: linear-gradient(to right, #1FA2FF 0%, #12D8FA  51%, #1FA2FF  100%)}
-.btn-grad {
-   margin: 10px;
-   padding: 15px 45px;
-   text-align: center;
-   text-transform: uppercase;
-   transition: 0.5s;
-   background-size: 200% auto;
-   color: white;            
-   box-shadow: 0 0 20px #eee;
-   border-radius: 10px;
-   display: block;
- }
-
- .btn-grad:hover {
-   background-position: right center; /* change the direction of the change here */
-   color: #fff;
-   text-decoration: none;
- }
-
-
-
  /* Keyframes */
 
 
@@ -335,7 +344,7 @@ button {
 #spells_content {
     display: flex;
     flex-wrap: wrap;
-    background: linear-gradient(135deg, #8fb6ff 0%, #f4cafb 100%);
+    background: radial-gradient(circle at center, #f9e5c1 0%, #d89b64 60%, #a35b34 100%);
     height: auto;
     gap: 15px;
     justify-content: center;
@@ -349,7 +358,7 @@ button {
     
     flex-direction: column;
     align-items: center;
-    background: linear-gradient(135deg, #8fb6ff 0%, #f4cafb 100%);
+    background: radial-gradient(circle at center, #fcebd4 0%, #f0d4a6 50%, #c47a4f 100%);
     border-radius: 15px;
     padding: 15px;
     width: 120px;
@@ -452,7 +461,7 @@ button {
 #research_content {
     display: flex;
     flex-wrap: wrap;
-    background: linear-gradient(135deg, #3279f2 0%, #ffffff 100%);
+    background: radial-gradient(circle at center, #f9e5c1 0%, #d89b64 60%, #a35b34 100%);
     height: auto;
     gap: 15px;
     justify-content: center;
@@ -463,10 +472,9 @@ button {
 .research_main {
     position: relative;
     display: flex;
-    
     flex-direction: column;
     align-items: center;
-    background: linear-gradient(135deg, #3279f2 0%, #ffffff 100%);
+    background: radial-gradient(circle at center, #fcebd4 0%, #f0d4a6 50%, #c47a4f 100%);
     border-radius: 15px;
     padding: 15px;
     width: 120px;
@@ -520,4 +528,84 @@ button {
 .research_main:hover > .researchtooltip {
     visibility: visible;
     opacity: 1;
+}
+
+
+.warning {
+    background-color: #ffdddd;
+    color: #a94442;
+    border: 1px solid #f5c6cb;
+    padding: 10px 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    max-width: 400px;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#warning_area {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.warning {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.warning.fade_out {
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+
+
+.research_lvl {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    width: 26px;
+    height: 26px;
+    background: radial-gradient(circle at center, #f9e5c1 0%, #d4a373 70%, #a35b34 100%);
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 13px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    pointer-events: none; /* doesn't block clicks */
+}
+
+.active_research {
+    animation: pulse_active 2.5s infinite ease-in-out;
+}
+
+@keyframes pulse_active {
+    0% { box-shadow: 0 0 12px rgba(255, 255, 255, 0.6), 0 0 20px rgba(244, 208, 160, 0.4); }
+    50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 30px rgba(244, 208, 160, 0.8); }
+    100% { box-shadow: 0 0 12px rgba(255, 241, 233, 0.6), 0 0 20px rgba(244, 208, 160, 0.4); }
+}
+
+.research_progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 5px;
+    width: 0%;
+    background: linear-gradient(to right, #ffffff, #ffffff); /* warm cookie gradient */
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    transition: width 0.2s ease-out;
+    z-index: 2;
 }
