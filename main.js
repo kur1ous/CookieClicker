@@ -55,26 +55,11 @@ function prettify(number) {
     return prettifySub(number) + suffix;
 }
 
-let prodMult = 1;
-
-class Warning {
-    constructor(name, desc, time){
-        this.name = name;
-        this.desc = desc;
-        this.time = time;
 
 
-        this.main = document.createElement("div");
-        this.main.classList.add("warning");
-        this.main.append(desc);
+// CLASSES
 
-        document.getElementById("warning_area").appendChild(this.main);
-
-        setTimeout(() => {
-            this.main.remove();
-        }, this.time);
-    }
-}
+// RESOURCES
 
 class Resource {
     constructor(resourceName, pic, per_second = 0) {
@@ -122,58 +107,6 @@ class Resource {
         this.quantityDisplay.innerHTML = prettify(this.quantity);
     }
 
-    tick(delta) {   
-        this.give(this.persecond*delta);   
-    }
-}
-
-class ClickableResource extends Resource {
-    constructor(){
-        super("🍪", "images/resources/cookie.png", 0)
-    }
-
-    gather() {
-        this.give(1+(ResearchProjects.ClickResearch.onComplete()));
-    }
-
-    spend(qty) {
-        this.quantity = this.quantity - qty;
-    }
-
-
-}
-
-class CappedResource extends Resource {
-    constructor(name, pic, cap, per_second = 0) {
-        super(name, pic, per_second);
-        this.cap = cap;
-        
-        //html
-        this.capDisplay = document.createElement("span");
-        this.capDisplay.innerHTML = prettify(this.cap);
-    
-        this.quantityTextDisplay.append("/");
-        this.quantityTextDisplay.appendChild(this.capDisplay);
-
-    
-    }
-
-    give(qty) {
-        super.give(qty);
-        if (this.quantity > this.cap) {
-            this.quantity = this.cap;
-        }
-    }
-
-    
-
-    spend(qty) {
-        this.quantity = this.quantity - qty;
-    }
-
-    updateUI() {
-    }
-    
     tick(delta) {   
         this.give(this.persecond*delta);   
     }
@@ -233,6 +166,107 @@ class ResourceView {
     
 }
 
+class ClickableResource extends Resource {
+    constructor(){
+        super("🍪", "images/resources/cookie.png", 0)
+    }
+
+    gather() {
+        this.give(1 + ResearchProjects.ClickResearch.getBonus());
+    }
+
+    spend(qty) {
+        this.quantity = this.quantity - qty;
+    }
+
+
+}
+
+class CappedResource extends Resource {
+    constructor(name, pic, cap, per_second = 0) {
+        super(name, pic, per_second);
+        this.cap = cap;
+        
+        //html
+        this.capDisplay = document.createElement("span");
+        this.capDisplay.innerHTML = prettify(this.cap);
+    
+        this.quantityTextDisplay.append("/");
+        this.quantityTextDisplay.appendChild(this.capDisplay);
+
+    
+    }
+
+    give(qty) {
+        super.give(qty);
+        if (this.quantity > this.cap) {
+            this.quantity = this.cap;
+        }
+    }
+
+    
+
+    spend(qty) {
+        this.quantity = this.quantity - qty;
+    }
+
+    updateUI() {
+    }
+    
+    tick(delta) {   
+        this.give(this.persecond*delta);   
+    }
+}
+
+class MilkProgressView {
+    constructor(resource){
+        this.resource = resource;
+
+        this.main = document.createElement("div");
+        this.main.classList.add('milk_container');
+        
+        this.fill = document.createElement('div');
+        this.fill.classList.add('milk_fill');
+
+        this.text = document.createElement('span');
+        this.text.classList.add("milk_pct")
+     
+        this.main.appendChild(this.fill);
+        this.main.appendChild(this.text);
+
+        document.getElementById('milk_content').appendChild(this.main);
+
+        this.updateUI()
+    }
+
+    updateUI(){
+        let pct = (this.resource.quantity/this.resource.cap) * 100;
+        this.fill.style.height = pct + "%";
+        this.text.innerHTML = `${Math.floor(pct)}`;
+    }
+}
+
+// WARNINGS
+class Warning {
+    constructor(name, desc, time){
+        this.name = name;
+        this.desc = desc;
+        this.time = time;
+
+
+        this.main = document.createElement("div");
+        this.main.classList.add("warning");
+        this.main.append(desc);
+
+        document.getElementById("warning_area").appendChild(this.main);
+
+        setTimeout(() => {
+            this.main.remove();
+        }, this.time);
+    }
+}
+
+// UTILITY
 class Utility {
     constructor(name, cost, production, elementID, pic) {
         this.name = name;
@@ -241,8 +275,6 @@ class Utility {
         this.show = 0
         this.production = production;
 
-
-        //for html
         this.main_icon = document.createElement("div");
         this.main_icon.classList.add("utility")
         this.button = document.createElement("button");
@@ -264,8 +296,6 @@ class Utility {
         this.productionDisplay = document.createElement("span");
         this.productionDisplay.classList.add("utility_production");
         this.show = this.production * this.quantity;
-    
-
 
         this.cost_area = document.createElement("p");
         this.costDisplay = document.createElement("span");
@@ -291,31 +321,18 @@ class Utility {
 
         this.tooltip.appendChild(this.production_area);
         this.tooltip.appendChild(this.cost_area);
-        
-
-        
 
         this.button.appendChild(this.image);
         this.button.appendChild(this.info_div);
         this.button.appendChild(this.quantityDisplay);
     
-
-
         this.button.onclick = () => {this.purchase();};
 
-     
         this.info_div.appendChild(this.quantityDisplay)
         this.main_icon.appendChild(this.tooltip);
         this.main_icon.appendChild(this.button);
 
-
-
-
         document.getElementById("utility_area").appendChild(this.main_icon);
-
-
-
-
     }
 
     purchase() {
@@ -330,6 +347,9 @@ class Utility {
             this.show = this.production * this.quantity
             console.log(this.name + this.quantity)
 
+        }
+        else {
+            new Warning("Purchase Warning", "You're too poor!", 3000)
         }
     }
 
@@ -371,38 +391,12 @@ class ProgressBarView {
     }
 
     updateUI() {
-        var pct = (this.resource.quantity/this.resource.cap) * 100;
+        let pct = (this.resource.quantity/this.resource.cap) * 100;
         this.fill.style.width = pct + "%";
     }
 }
 
-class MilkProgressView {
-    constructor(resource){
-        this.resource = resource;
-
-        this.main = document.createElement("div");
-        this.main.classList.add('milk_container');
-        
-        this.fill = document.createElement('div');
-        this.fill.classList.add('milk_fill');
-
-        this.text = document.createElement('span');
-        this.text.classList.add("milk_pct")
-     
-        this.main.appendChild(this.fill);
-        this.main.appendChild(this.text);
-
-        document.getElementById('milk_content').appendChild(this.main);
-
-        this.updateUI()
-    }
-
-    updateUI(){
-        var pct = (this.resource.quantity/this.resource.cap) * 100;
-        this.fill.style.height = pct + "%";
-        this.text.innerHTML = `${Math.floor(pct)}`;
-    }
-}
+//SPELLS
 
 class Spell {
     constructor(name, desc, cost, duration, cooldown, picture) {
@@ -454,7 +448,7 @@ class Spell {
         this.onCast();
     }
     else {
-        console.log("too poor!");
+        new Warning("Spell Warning", "Not Enough Milk!", 3000)
         console.log(this.getDuration());
 
     }
@@ -504,7 +498,24 @@ class Overdrive extends Spell {
     }
 }
 
+class Gamble extends Spell {
+    constructor(name, desc, cost, duration, cooldown, img){
+        super(name, desc, cost, duration, cooldown, img)
+    }
 
+    onCast(){
+        let rng = Math.floor(Math.random() * 2); //50/50
+        console.log(rng);
+
+        if (rng == 0) {
+            prodMult = 0;
+            console.log("ouch")
+        }
+    }
+}
+
+
+//RESEARCH
 
 class ResearchProject {
 	
@@ -548,7 +559,7 @@ class ResearchProject {
         this.researchlevel.innerHTML = "level " + this.level;
         this.researchname.append(this.name);
         this.tneeded.append(this.timeNeeded);
-        this.description.append(this.desc);
+        this.description.innerText = this.desc;
 
 
         this.main.appendChild(this.progressOverlay);
@@ -617,10 +628,13 @@ class ResearchProject {
 
 class MilkResearch extends ResearchProject {
     constructor(){
-        super("Milk", "Increase milk regen", 5, "images/research/milkresearch.png", 0, 0);
+        super("Milk", `Increase Milk Regeneration by 0.10 per level.`, 5, "images/research/milkresearch.png", 0, 0);
+        this.milkincrease = 0.1;
+
     }
     onComplete() {
-        resources.milk.persecond += 0.1;
+
+        resources.milk.persecond += this.milkincrease;
     }
 }
 
@@ -636,18 +650,30 @@ class CapResearch extends ResearchProject {
 
 class ClickResearch extends ResearchProject {
     constructor(){
-        super("Click", "Increase Cookie per Click", 5, "images/research/click.png", 0, 0)
+        super("Click", "Adds 1% of building production to each click", 5, "images/research/click.png", 0, 0)
+        this.description.innerHTML = this.bonus_text();
     }
-    onComplete(){
+
+    getBonus(){
+        let total_prod = 0;
         for (let i in utility) {
-            return (utility[i].getProduction()*utility[i].quantity*this.level)*0.01;
+            total_prod += utility[i].production * utility[i].quantity;
         }
+        return total_prod *(this.level*0.01);
+    }
+
+    bonus_text() {
+        return `Adds ${this.level}% of building production to each click.`;
+    }
+
+    onComplete(){
+        this.description.innerHTML = this.bonus_text();
     }
 }
 
 class SpellResearch extends ResearchProject {
     constructor() {
-        super("Spells", "Increace Spell Duration", 5,"images/research/spellresearch.png")
+        super("Spells", `Increace Spell Duration by 10%`, 5,"images/research/spellresearch.png")
     }
 
     onComplete(){
@@ -660,7 +686,7 @@ class SpellResearch extends ResearchProject {
 
 
 
-
+///RESEARCH CREATION
 var ResearchProjects = {
     MilkResearch: new MilkResearch(),
     ClickResearch: new ClickResearch(),
@@ -671,42 +697,36 @@ var ResearchProjects = {
 
 }
 
+var CurrentResearch = null;
+
+//SPELL CREATION
 var spells = {
     instabake: new Instabake("Instabake", "Hastely", 50, 0, 10, "images/spells/instabakev2.png"),
-    overdrive: new Overdrive("Overdrive", "Increase production of all resources by 25%", 25, 10, 5, "images/spells/overdrive.png"),
-    gamble: new Spell("Gamble", "What are the odds?", 20, 4, 5, "images/spells/gamble.png"),
+    overdrive: new Overdrive("Overdrive", "Increase production of all resources by 25%", 20, 30, 5, "images/spells/overdrive.png"),
+    gamble: new Gamble("Gamble", "What are the odds?", 1, 60, 5, "images/spells/gamble.png"),
 
 }
 
-//research
-var CurrentResearch = null;
-
-
-//resource creation
+//RESOURCE CREATION
 var resources = {
     cookies: new ClickableResource(),
     milk: new CappedResource("🥛", "images/resources/milk.png", 100,  0.1)
 };
 
+// PROD MULT
+let prodMult = 1;
 
+// RESOURCE VIEWS
 var milkProgView = new MilkProgressView(resources.milk);
-
-
-
 var cookiesDisplay = new ResourceView(resources.cookies);
 var milkDisplay = new ResourceView(resources.milk);
-
+var resourceViews = [cookiesDisplay, milkDisplay, milkProgView]
 
 var infoBar = document.getElementById("info_bar");
-
 infoBar.appendChild(cookiesDisplay.main);
 infoBar.appendChild(milkDisplay.main);
 
-var resourceViews = [cookiesDisplay, milkDisplay, milkProgView]
-
-
-
-//util creation
+//UTILITY CREATION
 var utility = {
     oven: new Utility("Oven", 50, 1, "oven", "images/ovens/oven.png"),
     silveroven: new Utility("Silver Oven", 200, 2, "silveroven", "images/ovens/silveroven.png"),
@@ -715,19 +735,21 @@ var utility = {
     amethystoven: new Utility("Amethyst Oven", 5000, 10, "amethystoven", "images/ovens/amethystoven.png")
 };
 
+//FUNCTIONS
 
+//TAB HANDLING
 function tab_Click(tabname) {
-    let tabs = document.querySelectorAll(".tab_button"); //takes all elements with class "tab_button" and stores in nodelist    
-    let contents = document.querySelectorAll(".tab_content");
+    let tabs = document.querySelectorAll(".tab_button"); //select all elements with "tab_button" class 
+    let contents = document.querySelectorAll(".tab_content"); //select all elements with "tab_content" class
     
-    contents.forEach(content => content.style.display = "none"); //loops through all elements with class "tab_content" and hides div
-    tabs.forEach(tab => tab.classList.remove("active_tab")); //loops through all elements in tabs nodelist and removes "active_tab" from button
+    contents.forEach(content => content.style.display = "none"); //hides all tab content areas by setting their display to "none"
+    tabs.forEach(tab => tab.classList.remove("active_tab")); //removes "active_tab" css from all tab buttons
 
-    let active_tab_button = document.getElementById(tabname + "_tab");
-    let active_content = document.getElementById(tabname + "_content");
+    let active_tab_button = document.getElementById(tabname + "_tab"); //finds tab button with clicked tab name
+    let active_content = document.getElementById(tabname + "_content"); //finds tab content with clicked tab name
 
-    if (active_tab_button && active_content) {
-        active_tab_button.classList.add("active_tab");
+    if (active_tab_button && active_content) { //if both tab button + tab content area exist, activate
+        active_tab_button.classList.add("active_tab"); //add "active_tab" css to clicked tab
         active_content.style.display = "";
     }
 
@@ -737,6 +759,8 @@ tab_Click('resource');
 
 var last_tick = Date.now();
 
+
+//UPDATES VISUALS
 function update_ui() {
 
     for (let i in spells){
@@ -757,6 +781,7 @@ function update_ui() {
 
 };
 
+//EVERY SECOND
 function tick() {
     var now = Date.now();
     var delta = (now - last_tick) / 1000;
@@ -787,6 +812,8 @@ function tick() {
 
 window.setInterval(tick, 1000 / 60);
 
+
+//DEBUG HELP
 function r(qty){
     resources.cookies.give(qty);
 }

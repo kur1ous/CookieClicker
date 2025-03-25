@@ -24,7 +24,7 @@ body::after {
     width: 200%; 
     height: 100%;
     background-image: url('images/background/cookiesvg.svg'); 
-    background-repeat: repeat;
+    
     background-size: 80px 80px; 
     z-index: -1;
     opacity: 0.08; 
@@ -407,7 +407,7 @@ button {
 }
 
 .utility img {
-    width: 40px; /* Adjust size as needed */
+    width: 40px; 
     height: 40px;
     margin-right: 5px;
     border-radius: 100px;
