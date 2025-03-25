@@ -362,7 +362,7 @@ class Utility {
 
 
     getProduction() {
-        return prettify(this.production * (ResearchProjects.ProductionResearch.level * 0.1) * prodMult);
+        return this.production * (ResearchProjects.ProductionResearch.level * 0.1) * prodMult;
     }
     
 
@@ -650,16 +650,16 @@ class CapResearch extends ResearchProject {
 
 class ClickResearch extends ResearchProject {
     constructor(){
-        super("Click", "Adds 1% of building production to each click", 5, "images/research/click.png", 0, 0)
+        super("Click", "Adds 1% of building production to each click", 15, "images/research/click.png", 0, 0)
         this.description.innerHTML = this.bonus_text();
     }
 
     getBonus(){
         let total_prod = 0;
         for (let i in utility) {
-            total_prod += utility[i].production * utility[i].quantity;
+            total_prod += (utility[i].getProduction()) * utility[i].quantity;
         }
-        return total_prod *(this.level*0.01);
+        return total_prod * (this.level * 0.01);
     }
 
     bonus_text() {
@@ -742,13 +742,13 @@ function tab_Click(tabname) {
     let tabs = document.querySelectorAll(".tab_button"); //select all elements with "tab_button" class 
     let contents = document.querySelectorAll(".tab_content"); //select all elements with "tab_content" class
     
-    contents.forEach(content => content.style.display = "none"); //hides all tab content areas by setting their display to "none"
+    contents.forEach(content => content.style.display = "none"); //hides all tab content via display to "none"
     tabs.forEach(tab => tab.classList.remove("active_tab")); //removes "active_tab" css from all tab buttons
 
     let active_tab_button = document.getElementById(tabname + "_tab"); //finds tab button with clicked tab name
     let active_content = document.getElementById(tabname + "_content"); //finds tab content with clicked tab name
 
-    if (active_tab_button && active_content) { //if both tab button + tab content area exist, activate
+    if (active_tab_button) { //if tab button, activate
         active_tab_button.classList.add("active_tab"); //add "active_tab" css to clicked tab
         active_content.style.display = "";
     }
