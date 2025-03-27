@@ -406,6 +406,8 @@ class Spell {
         this.baseduration = duration;
         this.duration = duration;
         this.cooldown = cooldown;
+        this.prog = 0;
+        this.cd = false;
 
         this.main = document.createElement("div");
         this.main.classList.add("spells")
@@ -416,16 +418,26 @@ class Spell {
         this.spelldesc.append(this.desc);
         this.spellcost = document.createElement("div");
         this.spellcost.classList.add("spellsprice")
-        this.spellcost.append(this.cost);
+        this.spellcost.append(`Cost: ${this.cost}🥛`);
         this.spellduration = document.createElement("div");
         this.spellduration.classList.add("spellsduration");
-        this.spellduration.append(this.duration)
+        this.spellduration.append(`Duration: ${this.duration}`);
+        this.spellscd = document.createElement("span");
+        this.spellscd.classList.add("spellsprice");
+        this.spellscd.append(`Cooldown: ${this.cooldown}s`);
+
+
+
+        this.cooldownBar = document.createElement("div");
+        this.cooldownBar.classList.add("research_progress");
+        this.main.appendChild(this.cooldownBar);
 
         this.tooltip = document.createElement("div");
         this.tooltip.classList.add("spellstooltip");
 
-        
         this.tooltip.appendChild(this.spellduration);
+
+        this.tooltip.appendChild(this.spellscd);
         this.tooltip.appendChild(this.spellcost);
         this.main.appendChild(this.spellimage);
         this.tooltip.appendChild(this.spelldesc);
@@ -443,12 +455,15 @@ class Spell {
     }
 
     purchase(){
-    if (resources.milk.quantity >= this.cost) {
+    if (resources.milk.quantity >= this.cost && this.cd == false) {
         resources.milk.spend(this.cost);
+        this.cd = true;
+        this.prog = 0 - this.duration;
         this.onCast();
+
     }
     else {
-        new Warning("Spell Warning", "Not Enough Milk!", 3000)
+        new Warning("Spell Warning", "Not Enough Milk", 3000)
         console.log(this.getDuration());
 
     }
@@ -456,12 +471,38 @@ class Spell {
     }
 
     updateUI() {
-    
-        this.spellduration.innerHTML = this.duration;
+        this.spelldesc.innerHTML = this.desc;
+        this.spellduration.innerHTML = `Duration: ${this.duration}`;
+
+        if (this.cd) {
+            const total_time = this.cooldown + this.baseduration;
+            let bar = this.prog + this.baseduration;
+            if (bar < 0){
+                bar = 0;
+            } 
+            if (bar > total_time) {
+                bar = total_time;
+            }
+            const pct = (bar / total_time) * 100;
+            this.cooldownBar.style.width = pct + "%";
+        }
+        else {
+            this.cooldownBar.style.width = "0%";
+        }
     }
 
     onCast(qty){
 
+    }
+
+    tick(delta) {
+        if (this.cd) {  //if active
+            this.prog += delta;
+            if (this.prog >= this.cooldown) {
+                this.cd = false;  
+                this.prog = 0;   //reset
+            }
+        }
     }
     
 }
@@ -472,8 +513,13 @@ class Instabake extends Spell {
     }
 
     onCast(){
-        console.log(this)
-        resources.cookies.give(5)
+        let total_prod = 0;
+
+        for (let i in utility){
+            let utility_prod = utility[i].getProduction() * utility[i].quantity;
+            total_prod += utility_prod;
+        }
+        resources.cookies.give(total_prod * 0.5);
     }
 }
 
@@ -509,8 +555,24 @@ class Gamble extends Spell {
 
         if (rng == 0) {
             prodMult = 0;
-            console.log("ouch")
+            console.log("loss")
+            for (let i in resources){
+                resources[i].persecond = resources[i].persecond * prodMult;
+            }
         }
+        else if (rng == 1) {
+            prodMult = 2;
+            console.log("win!")
+            for (let i in resources){
+                resources[i].persecond = resources[i].persecond * prodMult;
+            }
+        }
+
+        setTimeout(() => {
+            prodMult = 1;
+            resources.milk.persecond = resources.milk.basepersecond + (ResearchProjects.MilkResearch.level*0.1);
+
+        }, this.duration*1000);
     }
 }
 
@@ -533,15 +595,12 @@ class ResearchProject {
         this.progressOverlay = document.createElement("div");
         this.progressOverlay.classList.add("research_progress");
 
-
         this.researchname = document.createElement("span");
         this.researchname.classList.add("research_desc");
 
         this.researchlevel = document.createElement("div");
         this.researchlevel.classList.add("research_lvl");
         
-  
-
         this.researchimage = document.createElement("img");
         this.researchimage.src = picture;
         this.researchimage.classList.add("research_image");
@@ -555,12 +614,10 @@ class ResearchProject {
         this.tooltip = document.createElement("div");
         this.tooltip.classList.add("researchtooltip");
 
-
         this.researchlevel.innerHTML = "level " + this.level;
         this.researchname.append(this.name);
         this.tneeded.append(this.timeNeeded);
         this.description.innerText = this.desc;
-
 
         this.main.appendChild(this.progressOverlay);
         this.main.appendChild(this.researchlevel);
@@ -650,7 +707,7 @@ class CapResearch extends ResearchProject {
 
 class ClickResearch extends ResearchProject {
     constructor(){
-        super("Click", "Adds 1% of building production to each click", 15, "images/research/click.png", 0, 0)
+        super("Click", "Adds 1% of building production to each click", 1, "images/research/click.png", 0, 0)
         this.description.innerHTML = this.bonus_text();
     }
 
@@ -663,8 +720,9 @@ class ClickResearch extends ResearchProject {
     }
 
     bonus_text() {
-        return `Adds ${this.level}% of building production to each click.`;
+        return `Adds 1% of utility production to each click.`;
     }
+
 
     onComplete(){
         this.description.innerHTML = this.bonus_text();
@@ -701,9 +759,9 @@ var CurrentResearch = null;
 
 //SPELL CREATION
 var spells = {
-    instabake: new Instabake("Instabake", "Hastely", 50, 0, 10, "images/spells/instabakev2.png"),
-    overdrive: new Overdrive("Overdrive", "Increase production of all resources by 25%", 20, 30, 5, "images/spells/overdrive.png"),
-    gamble: new Gamble("Gamble", "What are the odds?", 1, 60, 5, "images/spells/gamble.png"),
+    instabake: new Instabake("Instabake", "Collect 50% of all utility production.", 30, 0, 10, "images/spells/instabakev2.png"),
+    overdrive: new Overdrive("Overdrive", "Increase production of all resources by 25%", 20, 30, 25, "images/spells/overdrive.png"),
+    gamble: new Gamble("Chance", "Chance to double all resource production, or set it to 0 for 2 minutes.", 50, 120, 60, "images/spells/gamble.png"),
 
 }
 
@@ -739,11 +797,13 @@ var utility = {
 
 //TAB HANDLING
 function tab_Click(tabname) {
-    let tabs = document.querySelectorAll(".tab_button"); //select all elements with "tab_button" class 
-    let contents = document.querySelectorAll(".tab_content"); //select all elements with "tab_content" class
+    //selects all elements with corresponding classes
+    let tabs = document.querySelectorAll(".tab_button"); 
+    let contents = document.querySelectorAll(".tab_content"); 
     
-    contents.forEach(content => content.style.display = "none"); //hides all tab content via display to "none"
-    tabs.forEach(tab => tab.classList.remove("active_tab")); //removes "active_tab" css from all tab buttons
+    
+    contents.forEach(content => content.style.display = "none"); //apply "none" for each element in contents
+    tabs.forEach(tab => tab.classList.remove("active_tab")); //removes "active_tab" css from each element in tabs
 
     let active_tab_button = document.getElementById(tabname + "_tab"); //finds tab button with clicked tab name
     let active_content = document.getElementById(tabname + "_content"); //finds tab content with clicked tab name
@@ -802,6 +862,9 @@ function tick() {
         utility[i].tick(delta);
     }
 
+    for (let i in spells) {
+        spells[i].tick(delta)
+    }
     
 
     
@@ -820,3 +883,5 @@ function r(qty){
 function m(qty){
     resources.milk.give(qty);
 }
+
+

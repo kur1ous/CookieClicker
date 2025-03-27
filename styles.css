@@ -113,6 +113,7 @@ button {
     height: auto;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+    font-family: "sans-seriff";
 }
 
 .spells:hover {
@@ -134,11 +135,11 @@ button {
 } 
 
 .spellsprice {
-    font-family: "magic";
+    font-family: "sans-serif";
 }
 
 .spellsduration {
-    font-family: sans-serif;
+    font-family: "sans-serif";
 }
 
 .spellsname {
